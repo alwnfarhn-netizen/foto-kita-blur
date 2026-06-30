@@ -109,15 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const isRingDown = landmarks[16].y > landmarks[14].y;
         
         // Jari Kelingking (Pinky Finger)
-        // 20: Ujung jari, 18: Ruas tengah (PIP)
         const isPinkyDown = landmarks[20].y > landmarks[18].y;
 
-        // Tambahan ketepatan: pastikan jari telunjuk dan tengah benar-benar lurus ke atas
-        // dibanding ruas paling bawahnya (MCP) untuk menghindari false-positive saat tangan miring
-        const isIndexStraight = landmarks[8].y < (landmarks[5].y - 0.03);
-        const isMiddleStraight = landmarks[12].y < (landmarks[9].y - 0.03);
+        // Toleransi tambahan untuk HP: Terkadang saat tangan miring, ujung jari manis/kelingking 
+        // tidak sepenuhnya "di bawah" ruasnya secara kordinat Y, tapi pasti jauh di bawah telunjuk.
+        const isRingLowerThanIndex = landmarks[16].y > landmarks[8].y;
+        const isPinkyLowerThanIndex = landmarks[20].y > landmarks[8].y;
 
-        return isIndexUp && isMiddleUp && isRingDown && isPinkyDown && isIndexStraight && isMiddleStraight;
+        const ringValid = isRingDown || isRingLowerThanIndex;
+        const pinkyValid = isPinkyDown || isPinkyLowerThanIndex;
+
+        return isIndexUp && isMiddleUp && ringValid && pinkyValid;
     }
 
     // --- Setup Event Listener untuk Trigger Manual ---
