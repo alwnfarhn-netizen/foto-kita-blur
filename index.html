@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto Kita Blur - Webcam Preview</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Foto Kita Blur</h1>
+        
+        <div class="privacy-notice">
+            <strong>🔒 Privasi Terjamin:</strong> AI pendeteksi tangan (MediaPipe) dan perekaman video berjalan 100% secara lokal di browser perangkat Anda. Video Anda <strong>tidak pernah dikirim ke server mana pun</strong>.
+        </div>
+
+        <div id="error-message" class="error-container hidden">
+            <!-- Error messages will be injected here -->
+        </div>
+
+        <div id="loading-message" class="loading-container">
+            Loading AI Model (MediaPipe)...
+        </div>
+
+        <div id="gesture-indicator" class="gesture-indicator hidden">
+            ✌️ PEACE SIGN TERDETEKSI!
+        </div>
+
+        <div class="video-container">
+            <video id="webcam-video" autoplay playsinline muted></video>
+            <canvas id="output-canvas"></canvas>
+            
+            <!-- Video untuk preview hasil rekaman -->
+            <video id="preview-video" class="hidden" controls playsinline></video>
+            
+            <!-- Overlay untuk hitungan mundur -->
+            <div id="countdown-overlay" class="countdown-overlay hidden">3</div>
+        </div>
+
+        <div class="controls-container">
+            <button id="manual-trigger-btn" class="manual-btn">TAHAN UNTUK BLUR (Spasi)</button>
+        </div>
+
+        <div class="preset-container" id="preset-selector-container">
+            <label for="blur-preset">Tingkat Blur:</label>
+            <select id="blur-preset">
+                <option value="8">Ringan</option>
+                <option value="15" selected>Sedang</option>
+                <option value="35">Brutal</option>
+            </select>
+            
+            <label class="mirror-label" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                <input type="checkbox" id="mirror-toggle" checked>
+                Mirror
+            </label>
+        </div>
+
+        <div class="recording-controls">
+            <button id="start-record-btn" class="record-btn">🔴 MULAI REKAM</button>
+            <button id="stop-record-btn" class="record-btn hidden">⏹ STOP REKAM</button>
+            <button id="download-btn" class="action-btn hidden">⬇️ DOWNLOAD VIDEO</button>
+            <button id="rerecord-btn" class="action-btn hidden">🔄 REKAM ULANG</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
