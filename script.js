@@ -56,26 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
             );
 
-            // Coba GPU dulu, jika gagal fallback ke CPU (penting untuk HP!)
-            const delegates = ["GPU", "CPU"];
-            for (const delegate of delegates) {
-                try {
-                    console.log(`Mencoba delegate: ${delegate}...`);
-                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                        baseOptions: {
-                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                            delegate: delegate
-                        },
-                        runningMode: runningMode,
-                        numHands: 1 // 1 tangan saja agar lebih ringan di HP
-                    });
-                    console.log(`Berhasil menggunakan delegate: ${delegate}`);
-                    break; // Berhasil, keluar dari loop
-                } catch (delegateError) {
-                    console.warn(`Delegate ${delegate} gagal:`, delegateError);
-                    if (delegate === "CPU") throw delegateError; // Jika CPU juga gagal, lempar error
-                }
-            }
+            // Deteksi mobile: iOS Safari sering hang jika dipaksa pakai GPU delegate MediaPipe
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const chosenDelegate = isMobile ? "CPU" : "GPU";
+            
+            console.log(`Perangkat Mobile: ${isMobile} | Menggunakan Delegate: ${chosenDelegate}`);
+
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                    delegate: chosenDelegate
+                },
+                runningMode: runningMode,
+                numHands: 1 // 1 tangan saja agar lebih ringan di HP
+            });
+
             loadingMessageElement.classList.add('hidden');
         } catch (error) {
             console.error("Gagal memuat model hand tracking:", error);
@@ -90,36 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
         videoElement.parentElement.classList.add('hidden'); // Hide video container if error
     }
 
-    // Fungsi untuk mendeteksi Peace Sign berdasarkan landmark tangan
     function isPeaceSign(landmarks) {
-        // Koordinat Y: 0 adalah atas gambar, 1 adalah bawah gambar.
-        // Jadi jari terangkat artinya nilai Y lebih kecil.
+        // Hitung berapa jari yang terangkat (berdasarkan perbandingan ujung jari vs ruas tengah)
+        let fingersUp = 0;
         
-        // Jari Telunjuk (Index Finger)
-        // 8: Ujung jari, 6: Ruas tengah (PIP)
         const isIndexUp = landmarks[8].y < landmarks[6].y;
-        
-        // Jari Tengah (Middle Finger)
-        // 12: Ujung jari, 10: Ruas tengah (PIP)
         const isMiddleUp = landmarks[12].y < landmarks[10].y;
-        
-        // Jari Manis (Ring Finger)
-        // 16: Ujung jari, 14: Ruas tengah (PIP)
-        // Terlipat = ujung jari berada di bawah ruas tengah
-        const isRingDown = landmarks[16].y > landmarks[14].y;
-        
-        // Jari Kelingking (Pinky Finger)
-        const isPinkyDown = landmarks[20].y > landmarks[18].y;
+        const isRingUp = landmarks[16].y < landmarks[14].y;
+        const isPinkyUp = landmarks[20].y < landmarks[18].y;
 
-        // Toleransi tambahan untuk HP: Terkadang saat tangan miring, ujung jari manis/kelingking 
-        // tidak sepenuhnya "di bawah" ruasnya secara kordinat Y, tapi pasti jauh di bawah telunjuk.
-        const isRingLowerThanIndex = landmarks[16].y > landmarks[8].y;
-        const isPinkyLowerThanIndex = landmarks[20].y > landmarks[8].y;
+        if (isIndexUp) fingersUp++;
+        if (isMiddleUp) fingersUp++;
+        if (isRingUp) fingersUp++;
+        if (isPinkyUp) fingersUp++;
 
-        const ringValid = isRingDown || isRingLowerThanIndex;
-        const pinkyValid = isPinkyDown || isPinkyLowerThanIndex;
-
-        return isIndexUp && isMiddleUp && ringValid && pinkyValid;
+        // Syarat Peace Sign (V): 
+        // 1. Tepat HANYA 2 jari yang naik
+        // 2. Kedua jari itu adalah Telunjuk dan Tengah
+        return (fingersUp === 2) && isIndexUp && isMiddleUp;
     }
 
     // --- Setup Event Listener untuk Trigger Manual ---
