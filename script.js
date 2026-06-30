@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvasElement.getContext('2d');
     const errorMessageElement = document.getElementById('error-message');
     const loadingMessageElement = document.getElementById('loading-message');
-    const gestureIndicatorElement = document.getElementById('gesture-indicator');
     const manualTriggerBtn = document.getElementById('manual-trigger-btn');
     
     // UI Recording
@@ -329,20 +328,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. Hitung intensitas blur (Transisi halus berdasarkan deltaTime)
             if (shouldBlur) {
-                // Tambah blur sampai mentok di MAX_BLUR_RADIUS
                 currentBlur = Math.min(MAX_BLUR_RADIUS, currentBlur + (FADE_RATE * deltaTime));
-                
-                // Ubah teks indikator sesuai pemicu
-                if (peaceSignDetected) {
-                    gestureIndicatorElement.textContent = "✌️ PEACE SIGN TERDETEKSI!";
-                } else {
-                    gestureIndicatorElement.textContent = "👆 TOMBOL DITEKAN!";
-                }
-                gestureIndicatorElement.classList.remove('hidden');
             } else {
-                // Kurangi blur sampai kembali ke 0 (Tajam)
                 currentBlur = Math.max(0, currentBlur - (FADE_RATE * deltaTime));
-                gestureIndicatorElement.classList.add('hidden');
             }
 
             // 3. Simpan state context dasar
@@ -363,30 +351,115 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ctx.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
-            // 4. Wajib reset filter agar titik-titik hijau tidak ikut ter-blur
+            // 4. Wajib reset filter agar elemen lain tidak ikut ter-blur
             ctx.filter = 'none';
-
-            // 5. Gambar landmark tangan di atas video
-            if (handResults && handResults.landmarks) {
-                ctx.fillStyle = "#00ff00"; // Titik warna hijau
-                for (const landmarks of handResults.landmarks) {
-                    for (const landmark of landmarks) {
-                        const x = landmark.x * canvasElement.width;
-                        const y = landmark.y * canvasElement.height;
-                        
-                        ctx.beginPath();
-                        ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                        ctx.fill();
-                    }
-                }
-            }
 
             // Kembalikan (restore) context seperti semula sebelum loop frame berikutnya
             ctx.restore();
+
+            // 5. Gambar Watermark (setelah restore agar tidak ter-mirror)
+            const watermarkText = "📷 IG & 🎵 TikTok: @alwnfarhn";
+            ctx.font = "bold 20px 'Plus Jakarta Sans', Arial, sans-serif";
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.textAlign = "right";
+            
+            // Tambahkan shadow agar teks terbaca di atas background video apapun
+            ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+            ctx.shadowBlur = 4;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            
+            ctx.fillText(watermarkText, canvasElement.width - 20, canvasElement.height - 20);
+            
+            // Reset shadow untuk frame berikutnya
+            ctx.shadowColor = "transparent";
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
         }
         
         // Panggil kembali frame berikutnya secara terus menerus
         requestAnimationFrame(renderToCanvas);
+    }
+
+    // --- Logic Popup ---
+    const popup1 = document.getElementById('popup-1');
+    const popup2 = document.getElementById('popup-2');
+    const btnNextPopup = document.getElementById('btn-next-popup');
+    const btnClosePopup = document.getElementById('btn-close-popup');
+
+    function showPopup(popup) {
+        if (!popup) return;
+        popup.classList.remove('hidden');
+        // Sedikit delay agar transisi CSS bekerja
+        setTimeout(() => popup.classList.add('show'), 10);
+    }
+
+    function hidePopup(popup, onHidden) {
+        if (!popup) return;
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.classList.add('hidden');
+            if (onHidden) onHidden();
+        }, 400); // Sesuaikan dengan durasi transisi CSS
+    }
+
+    // Tampilkan Popup 1 saat pertama kali dimuat
+    // Untuk saat ini (masa pengujian), dimunculkan setiap kali refresh
+    setTimeout(() => {
+        showPopup(popup1);
+    }, 500);
+
+    if (btnNextPopup) {
+        btnNextPopup.addEventListener('click', () => {
+            hidePopup(popup1, () => {
+                showPopup(popup2);
+            });
+        });
+    }
+
+    if (btnClosePopup) {
+        btnClosePopup.addEventListener('click', () => {
+            hidePopup(popup2);
+            // localStorage.setItem('hasSeenPopups', 'true'); // Dinonaktifkan sementara untuk testing
+        });
+    }
+
+    // --- Logic Full Screen ---
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    const videoContainer = document.querySelector('.video-container');
+
+    if (fullscreenBtn && videoContainer) {
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                // Masuk Fullscreen
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.webkitRequestFullscreen) { /* Safari */
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) { /* IE11 */
+                    videoContainer.msRequestFullscreen();
+                }
+            } else {
+                // Keluar Fullscreen
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        });
+
+        // Update teks tombol saat status fullscreen berubah
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.textContent = '❌ Close Full Screen';
+            } else {
+                fullscreenBtn.textContent = '🔲 Full Screen';
+            }
+        });
     }
 
     startWebcam();

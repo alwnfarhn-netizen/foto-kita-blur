@@ -4,11 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Foto Kita Blur - Webcam Preview</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
     <div class="container">
         <h1>Foto Kita Blur</h1>
+        <p class="subtitle">by <strong>@alwnfarhn</strong></p>
         
         <div class="privacy-notice">
             <strong>🔒 Privasi Terjamin:</strong> AI pendeteksi tangan (MediaPipe) dan perekaman video berjalan 100% secara lokal di browser perangkat Anda. Video Anda <strong>tidak pernah dikirim ke server mana pun</strong>.
@@ -22,9 +26,6 @@
             Loading AI Model (MediaPipe)...
         </div>
 
-        <div id="gesture-indicator" class="gesture-indicator hidden">
-            ✌️ PEACE SIGN TERDETEKSI!
-        </div>
 
         <div class="video-container">
             <video id="webcam-video" autoplay playsinline muted></video>
@@ -35,34 +36,69 @@
             
             <!-- Overlay untuk hitungan mundur -->
             <div id="countdown-overlay" class="countdown-overlay hidden">3</div>
-        </div>
-
-        <div class="controls-container">
-            <button id="manual-trigger-btn" class="manual-btn">TAHAN UNTUK BLUR (Spasi)</button>
-        </div>
-
-        <div class="preset-container" id="preset-selector-container">
-            <label for="blur-preset">Tingkat Blur:</label>
-            <select id="blur-preset">
-                <option value="8">Ringan</option>
-                <option value="15" selected>Sedang</option>
-                <option value="35">Brutal</option>
-            </select>
             
-            <label class="mirror-label" style="display:flex; align-items:center; gap:5px; cursor:pointer;">
-                <input type="checkbox" id="mirror-toggle" checked>
-                Mirror
-            </label>
+            <!-- Tombol Fullscreen -->
+            <button id="fullscreen-btn" class="fullscreen-btn">🔲 Full Screen</button>
         </div>
 
-        <div class="recording-controls">
-            <button id="start-record-btn" class="record-btn">🔴 MULAI REKAM</button>
-            <button id="stop-record-btn" class="record-btn hidden">⏹ STOP REKAM</button>
-            <button id="download-btn" class="action-btn hidden">⬇️ DOWNLOAD VIDEO</button>
-            <button id="rerecord-btn" class="action-btn hidden">🔄 REKAM ULANG</button>
+        <div class="bottom-ui">
+            <div class="controls-container">
+                <button id="manual-trigger-btn" class="manual-btn">TAHAN UNTUK BLUR (Spasi)</button>
+            </div>
+
+            <div class="preset-container" id="preset-selector-container">
+                <label for="blur-preset">Tingkat Blur:</label>
+                <select id="blur-preset">
+                    <option value="8">Ringan</option>
+                    <option value="15" selected>Sedang</option>
+                    <option value="35">Brutal</option>
+                </select>
+                
+                <label class="mirror-label">
+                    <input type="checkbox" id="mirror-toggle" checked>
+                    Mirror
+                </label>
+            </div>
+
+            <div class="recording-controls">
+                <button id="start-record-btn" class="record-btn">🔴 MULAI REKAM</button>
+                <button id="stop-record-btn" class="record-btn hidden">⏹ STOP REKAM</button>
+                <button id="download-btn" class="action-btn hidden">⬇️ DOWNLOAD VIDEO</button>
+                <button id="rerecord-btn" class="action-btn hidden">🔄 REKAM ULANG</button>
+            </div>
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- Popup 1: Welcome & Rules -->
+    <div id="popup-1" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>🎉 Yeay! Uji Coba Gratis 7 Hari Kamu Sudah Aktif!</h2>
+            <div class="trial-badge">🎁 Periode: <strong>1 Juli – 7 Juli 2025</strong></div>
+            <p>Terima kasih banyak sudah mencoba <strong>Foto Kita Blur!</strong> 🙌</p>
+            <p>Yuk, seru-seruan bareng teman-teman kamu! Jangan lupa buat follow Instagram <strong>@alwnfarhn</strong>, lalu post dan tag hasil foto atau video blur gokil kamu ke <strong>@alwnfarhn</strong> dan <strong>@salpriadi</strong> ya! 📸✨</p>
+            <p>Sebarin juga link web ini ke teman-teman kalian biar bisa seru-seruan bareng. <em>Have fun and thank you!</em> 🚀</p>
+            <button id="btn-next-popup" class="popup-btn">Mulai Seru-seruan!</button>
+        </div>
+    </div>
+
+    <!-- Popup 2: Cara Penggunaan & Fitur -->
+    <div id="popup-2" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>✨ Cara Menggunakan & Fitur</h2>
+            <div class="challenge-box">
+                🎵 <strong>Challenge:</strong> Sebelum mulai, siapkan HP, buka TikTok dan cari lagu <strong>Sal Priadi - Foto Kita Blur</strong>. Rekam video kalian dan berikan blur terbaik kamu!
+            </div>
+            <ul class="feature-list">
+                <li>✌️ <strong>Sensor Peace:</strong> Acungkan jari "Peace" (✌️) ke kamera untuk nge-blur muka kamu otomatis!</li>
+                <li>👆 <strong>Tombol Manual:</strong> Tahan tombol "TAHAN UNTUK BLUR" atau tombol Spasi di keyboard buat nge-blur secara manual.</li>
+                <li>🎛️ <strong>Tingkat Blur:</strong> Atur sendiri seberapa nge-blur muka kamu (Ringan, Sedang, Brutal).</li>
+                <li>🔴 <strong>Rekam Video:</strong> Bikin video gokil dengan klik "MULAI REKAM" dan langsung download hasilnya.</li>
+                <li>🔒 <strong>100% Aman:</strong> Semua proses jalan di HP/Laptop kamu, nggak ada data yang dikirim ke server.</li>
+            </ul>
+            <button id="btn-close-popup" class="popup-btn">Paham, Gas!</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js?v=2"></script>
 </body>
 </html>
