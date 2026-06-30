@@ -55,18 +55,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const vision = await FilesetResolver.forVisionTasks(
                 "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
             );
-            handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                baseOptions: {
-                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
-                    delegate: "GPU"
-                },
-                runningMode: runningMode,
-                numHands: 2
-            });
-            loadingMessageElement.classList.add('hidden'); // Sembunyikan loading jika sukses
+
+            // Coba GPU dulu, jika gagal fallback ke CPU (penting untuk HP!)
+            const delegates = ["GPU", "CPU"];
+            for (const delegate of delegates) {
+                try {
+                    console.log(`Mencoba delegate: ${delegate}...`);
+                    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                            delegate: delegate
+                        },
+                        runningMode: runningMode,
+                        numHands: 1 // 1 tangan saja agar lebih ringan di HP
+                    });
+                    console.log(`Berhasil menggunakan delegate: ${delegate}`);
+                    break; // Berhasil, keluar dari loop
+                } catch (delegateError) {
+                    console.warn(`Delegate ${delegate} gagal:`, delegateError);
+                    if (delegate === "CPU") throw delegateError; // Jika CPU juga gagal, lempar error
+                }
+            }
+            loadingMessageElement.classList.add('hidden');
         } catch (error) {
             console.error("Gagal memuat model hand tracking:", error);
-            showError("Gagal memuat model AI pendeteksi tangan.");
+            showError("Gagal memuat model AI pendeteksi tangan. Coba refresh halaman.");
         }
     }
     initializeHandTracking();
@@ -257,12 +270,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Request video access. Not requesting audio as per SPEC.
+            // Deteksi mobile untuk menurunkan resolusi (performa lebih baik)
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 video: {
-                    facingMode: 'user', // Prefer front camera on mobile
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
+                    facingMode: 'user',
+                    width: { ideal: isMobile ? 640 : 1280 },
+                    height: { ideal: isMobile ? 480 : 720 }
                 }, 
                 audio: false 
             });
@@ -425,34 +439,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Logic Full Screen ---
+    // --- Logic Full Screen (Hybrid: API + CSS fallback untuk HP) ---
     const fullscreenBtn = document.getElementById('fullscreen-btn');
     const videoContainer = document.querySelector('.video-container');
+    let isCustomFullscreen = false;
+
+    function enterFullscreen() {
+        // Coba Fullscreen API dulu (berfungsi di desktop)
+        const fsElement = videoContainer;
+        const fsRequest = fsElement.requestFullscreen || fsElement.webkitRequestFullscreen || fsElement.msRequestFullscreen;
+        
+        if (fsRequest) {
+            fsRequest.call(fsElement).catch(() => {
+                // Jika API gagal (HP), gunakan CSS fullscreen
+                activateCSSFullscreen();
+            });
+        } else {
+            // Tidak ada API sama sekali, gunakan CSS fullscreen
+            activateCSSFullscreen();
+        }
+    }
+
+    function activateCSSFullscreen() {
+        videoContainer.classList.add('css-fullscreen');
+        fullscreenBtn.textContent = '❌ Close Full Screen';
+        isCustomFullscreen = true;
+    }
+
+    function exitCSSFullscreen() {
+        videoContainer.classList.remove('css-fullscreen');
+        fullscreenBtn.textContent = '🔲 Full Screen';
+        isCustomFullscreen = false;
+    }
+
+    function exitFullscreen() {
+        if (document.fullscreenElement) {
+            (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen).call(document);
+        } else if (isCustomFullscreen) {
+            exitCSSFullscreen();
+        }
+    }
 
     if (fullscreenBtn && videoContainer) {
         fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                // Masuk Fullscreen
-                if (videoContainer.requestFullscreen) {
-                    videoContainer.requestFullscreen();
-                } else if (videoContainer.webkitRequestFullscreen) { /* Safari */
-                    videoContainer.webkitRequestFullscreen();
-                } else if (videoContainer.msRequestFullscreen) { /* IE11 */
-                    videoContainer.msRequestFullscreen();
-                }
+            if (!document.fullscreenElement && !isCustomFullscreen) {
+                enterFullscreen();
             } else {
-                // Keluar Fullscreen
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari */
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) { /* IE11 */
-                    document.msExitFullscreen();
-                }
+                exitFullscreen();
             }
         });
 
-        // Update teks tombol saat status fullscreen berubah
+        // Update tombol saat status fullscreen API berubah (desktop)
         document.addEventListener('fullscreenchange', () => {
             if (document.fullscreenElement) {
                 fullscreenBtn.textContent = '❌ Close Full Screen';
