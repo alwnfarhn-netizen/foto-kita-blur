@@ -166,7 +166,12 @@ h1 {
 }
 
 #webcam-video {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
 }
 
 #output-canvas, #preview-video {
