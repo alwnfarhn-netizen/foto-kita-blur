@@ -312,27 +312,33 @@ h1 {
 }
 
 .shutter-btn {
-    width: 76px;
-    height: 76px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     background: #e63946;
-    border: 6px solid #ffffff;
+    border: 5px solid #ffffff;
     outline: 4px solid #e63946;
     cursor: pointer;
     box-shadow: 0 6px 15px rgba(230, 57, 70, 0.3);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8px;
 }
 .shutter-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.95);
     background: #d32f2f;
     box-shadow: 0 2px 8px rgba(230, 57, 70, 0.4);
 }
-.shutter-label {
-    font-size: 0.7rem;
+.shutter-text {
+    font-size: 0.75rem;
     font-weight: 800;
-    color: #e63946;
+    color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1.2;
 }
 
 .mirror-label {
