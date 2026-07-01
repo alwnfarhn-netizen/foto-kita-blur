@@ -77,33 +77,41 @@
         </div>
 
         <div class="bottom-ui">
+            <!-- Photobox Control Panel -->
+            <div class="photobox-panel">
+                <!-- Kiri: Blur Options -->
+                <div class="panel-side panel-left">
+                    <label class="retro-label">Tingkat Blur</label>
+                    <select id="blur-preset" class="retro-select">
+                        <option value="8">Ringan</option>
+                        <option value="15" selected>Sedang</option>
+                        <option value="35">Brutal</option>
+                    </select>
+                </div>
+
+                <!-- Tengah: Shutter Button -->
+                <div class="panel-center">
+                    <button id="manual-trigger-btn" class="shutter-btn"></button>
+                    <div class="shutter-label">TAHAN UNTUK BLUR (SPASI)</div>
+                </div>
+
+                <!-- Kanan: Mirror & Record -->
+                <div class="panel-side panel-right">
+                    <label class="mirror-label retro-label">
+                        <input type="checkbox" id="mirror-toggle" checked>
+                        Mode Mirror
+                    </label>
+                    <div class="recording-controls mini-recording">
+                        <button id="start-record-btn" class="record-btn-mini">🔴 Rekam Video</button>
+                        <button id="stop-record-btn" class="record-btn-mini hidden">⏹ Stop</button>
+                        <button id="download-btn" class="action-btn-mini hidden">⬇️ Simpan</button>
+                        <button id="rerecord-btn" class="action-btn-mini hidden">🔄 Ulangi</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="spotify-container">
                 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5ub2KSCpnGbmYyKLruGUPF?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-            </div>
-
-            <div class="controls-container">
-                <button id="manual-trigger-btn" class="manual-btn">TAHAN UNTUK BLUR (Spasi)</button>
-            </div>
-
-            <div class="preset-container" id="preset-selector-container">
-                <label for="blur-preset">Blur:</label>
-                <select id="blur-preset">
-                    <option value="8">Ringan</option>
-                    <option value="15" selected>Sedang</option>
-                    <option value="35">Brutal</option>
-                </select>
-                
-                <label class="mirror-label">
-                    <input type="checkbox" id="mirror-toggle" checked>
-                    Mirror
-                </label>
-            </div>
-
-            <div class="recording-controls">
-                <button id="start-record-btn" class="record-btn">🔴 MULAI REKAM</button>
-                <button id="stop-record-btn" class="record-btn hidden">⏹ STOP REKAM</button>
-                <button id="download-btn" class="action-btn hidden">⬇️ DOWNLOAD VIDEO</button>
-                <button id="rerecord-btn" class="action-btn hidden">🔄 REKAM ULANG</button>
             </div>
         </div>
     </div>
