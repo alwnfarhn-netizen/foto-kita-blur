@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('download-btn');
     const rerecordBtn = document.getElementById('rerecord-btn');
     const countdownOverlay = document.getElementById('countdown-overlay');
+    const photoboothCountdown = document.getElementById('photobooth-countdown');
+    const cameraFlash = document.getElementById('camera-flash');
     const presetSelect = document.getElementById('blur-preset');
     const mirrorToggle = document.getElementById('mirror-toggle');
 
@@ -32,6 +34,28 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentBlur = 0;
     let lastRenderTime = performance.now();
     let isManualTriggerActive = false; // Status tombol manual/spasi
+    
+    // --- State untuk Photobooth ---
+    let isPhotoboothActive = false;
+    let photoboothState = 'IDLE'; // IDLE, BLUR_WAIT, COUNTING, SNAPPING
+    let photoboothCount = 3;
+    let photoboothLastTick = 0;
+    let photoboothTotalPhotos = 4; // Default
+    let photoboothCurrentPhotoIndex = 0;
+    let photoboothImages = [];
+    let photoboothBlurStartTime = 0;
+    
+    // UI Layout Sidebar
+    const layoutBtns = document.querySelectorAll('.layout-btn');
+    const liveStripPreview = document.getElementById('live-strip-preview');
+
+    layoutBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            layoutBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            photoboothTotalPhotos = parseInt(btn.getAttribute('data-layout'), 10) || 4;
+        });
+    });
     
     // Konstanta/Variabel Blur
     const FADE_DURATION_MS = 300; // Waktu yang dibutuhkan untuk full blur atau kembali tajam
@@ -247,6 +271,164 @@ document.addEventListener('DOMContentLoaded', () => {
     // Panggil setup
     setupRecordingUI();
 
+    // === LOGIKA PHOTOBOOTH CANVAS STITCHING ===
+
+    const previewPopup = document.getElementById('preview-popup');
+    const previewImage = document.getElementById('preview-image');
+    const btnDownloadPhoto = document.getElementById('btn-download-photo');
+    const btnClosePreview = document.getElementById('btn-close-preview');
+    let currentPhotoDataUrl = null;
+
+    function showPreviewModal(dataUrl) {
+        currentPhotoDataUrl = dataUrl;
+        previewImage.src = dataUrl;
+        previewPopup.classList.remove('hidden');
+        setTimeout(() => previewPopup.classList.add('show'), 10);
+    }
+
+    btnDownloadPhoto.addEventListener('click', () => {
+        if (!currentPhotoDataUrl) return;
+        const a = document.createElement('a');
+        a.href = currentPhotoDataUrl;
+        a.download = `FotoKitaBlur_Strip_${new Date().getTime()}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    btnClosePreview.addEventListener('click', () => {
+        previewPopup.classList.remove('show');
+        setTimeout(() => {
+            previewPopup.classList.add('hidden');
+            previewImage.src = "";
+            currentPhotoDataUrl = null;
+            // Sembunyikan juga live strip saat popup ditutup
+            liveStripPreview.classList.add('hidden');
+        }, 400);
+    });
+
+    function processPhotoboothGrid() {
+        if (photoboothImages.length === 0) return;
+
+        const imgWidth = 600;
+        const imgHeight = 750; // 4:5 ratio
+        const margin = 40; 
+        const spacing = 20; 
+        
+        const rows = photoboothImages.length;
+        const cols = 1;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = (imgWidth * cols) + (margin * 2);
+        canvas.height = (imgHeight * rows) + (margin * 2) + (spacing * (rows - 1)) + 120;
+        
+        const context = canvas.getContext('2d');
+        
+        // Base background
+        context.fillStyle = '#fdfdfd';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        let loadedImages = 0;
+        const images = [];
+
+        photoboothImages.forEach((src, idx) => {
+            const img = new Image();
+            img.onload = () => {
+                images[idx] = img;
+                loadedImages++;
+                if (loadedImages === photoboothImages.length) {
+                    drawFinalGrid(context, canvas, images, imgWidth, imgHeight, margin, spacing);
+                }
+            };
+            img.src = src;
+        });
+    }
+
+    function drawFinalGrid(ctx, canvas, images, imgWidth, imgHeight, margin, spacing) {
+        images.forEach((img, idx) => {
+            const y = margin + (idx * (imgHeight + spacing));
+            ctx.drawImage(img, margin, y, imgWidth, imgHeight);
+            
+            // stroke border
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(margin, y, imgWidth, imgHeight);
+        });
+
+        // Branding text at the bottom
+        ctx.font = "bold 45px 'Plus Jakarta Sans', Arial, sans-serif";
+        ctx.fillStyle = "#222222";
+        ctx.textAlign = "center";
+        ctx.fillText("FOTO KITA BLUR", canvas.width / 2, canvas.height - 70);
+
+        ctx.font = "24px 'Plus Jakarta Sans', Arial, sans-serif";
+        ctx.fillStyle = "#777777";
+        ctx.fillText("📷 IG & 🎵 TikTok: @alwnfarhn", canvas.width / 2, canvas.height - 30);
+
+        const finalDataURL = canvas.toDataURL('image/jpeg', 0.9);
+        showPreviewModal(finalDataURL);
+    }
+
+    function takeSnapshotForGrid() {
+        // Efek Flash
+        cameraFlash.classList.remove('hidden');
+        cameraFlash.classList.add('flash-animation');
+        
+        setTimeout(() => {
+            cameraFlash.classList.remove('flash-animation');
+            cameraFlash.classList.add('hidden');
+        }, 800);
+
+        // Ambil frame asli dari videoElement agar tidak kena efek blur
+        const srcW = videoElement.videoWidth;
+        const srcH = videoElement.videoHeight;
+        let cropW = srcW;
+        let cropH = srcH;
+        let cropX = 0;
+        let cropY = 0;
+
+        const targetRatio = 4/5;
+        const currentRatio = srcW / srcH;
+
+        if (currentRatio > targetRatio) {
+            // Lebar terlalu besar, crop kiri kanan
+            cropW = srcH * targetRatio;
+            cropX = (srcW - cropW) / 2;
+        } else {
+            // Tinggi terlalu besar, crop atas bawah
+            cropH = srcW / targetRatio;
+            cropY = (srcH - cropH) / 2;
+        }
+
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = cropW;
+        tempCanvas.height = cropH;
+        const tctx = tempCanvas.getContext('2d');
+        
+        // Terapkan mirror (cermin) jika mode mirror aktif
+        if (isMirrored) {
+            tctx.translate(cropW, 0);
+            tctx.scale(-1, 1);
+        }
+
+        // Gambar dari videoElement asli
+        tctx.drawImage(videoElement, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+        const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9);
+        photoboothImages.push(dataURL);
+        
+        // Tampilkan di Live Strip Preview
+        const imgEl = document.createElement('img');
+        imgEl.src = dataURL;
+        liveStripPreview.appendChild(imgEl);
+        
+        photoboothCurrentPhotoIndex++;
+        
+        // Pindah ke state delay agar ada jeda antar foto
+        photoboothState = 'POST_SNAP_WAIT';
+        photoboothLastTick = performance.now();
+    }
+
     async function startWebcam() {
         // Check if the browser supports getUserMedia
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -323,7 +505,74 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Gabungkan logika dari AI (Gesture) dan Tombol Manual
-            const shouldBlur = peaceSignDetected || isManualTriggerActive;
+            const userTriggering = peaceSignDetected || isManualTriggerActive;
+
+            // --- LOGIKA PHOTOBOOTH COUNTDOWN ---
+            if (userTriggering && photoboothState === 'IDLE') {
+                isPhotoboothActive = true;
+                photoboothState = 'BLUR_WAIT';
+                photoboothBlurStartTime = now;
+                photoboothCurrentPhotoIndex = 0;
+                photoboothImages = [];
+                
+                // Clear dan tampilkan live preview
+                liveStripPreview.innerHTML = '';
+                liveStripPreview.classList.remove('hidden');
+            }
+
+            if (isPhotoboothActive) {
+                if (!userTriggering) {
+                     // Abort jika jari diturunkan sebelum selesai
+                     isPhotoboothActive = false;
+                     photoboothState = 'IDLE';
+                     photoboothCountdown.classList.add('hidden');
+                     liveStripPreview.classList.add('hidden');
+                } else {
+                    if (photoboothState === 'BLUR_WAIT') {
+                        if (now - photoboothBlurStartTime >= 1000) {
+                            photoboothState = 'COUNTING';
+                            photoboothCount = 3;
+                            photoboothLastTick = now;
+                            photoboothCountdown.textContent = photoboothCount;
+                            photoboothCountdown.classList.remove('hidden');
+                        }
+                    } else if (photoboothState === 'COUNTING') {
+                        if (now - photoboothLastTick >= 1000) {
+                            photoboothCount--;
+                            photoboothLastTick = now;
+                            
+                            if (photoboothCount > 0) {
+                                photoboothCountdown.textContent = photoboothCount;
+                                photoboothCountdown.style.animation = 'none';
+                                photoboothCountdown.offsetHeight; 
+                                photoboothCountdown.style.animation = 'pulseScale 1s ease-in-out infinite';
+                            } else {
+                                photoboothCountdown.classList.add('hidden');
+                                takeSnapshotForGrid();
+                            }
+                        }
+                    } else if (photoboothState === 'POST_SNAP_WAIT') {
+                        // Jeda 1 detik (1000ms) setelah jepretan sebelum mulai menghitung foto berikutnya
+                        if (now - photoboothLastTick >= 1000) {
+                            if (photoboothCurrentPhotoIndex < photoboothTotalPhotos) {
+                                // Masih ada foto yang harus diambil, mulai ngitung lagi
+                                photoboothState = 'COUNTING';
+                                photoboothCount = 3;
+                                photoboothLastTick = now;
+                                photoboothCountdown.textContent = photoboothCount;
+                                photoboothCountdown.classList.remove('hidden');
+                            } else {
+                                // Semua foto selesai
+                                isPhotoboothActive = false;
+                                photoboothState = 'IDLE';
+                                processPhotoboothGrid();
+                            }
+                        }
+                    }
+                }
+            }
+
+            const shouldBlur = userTriggering;
 
             // 2. Hitung intensitas blur (Transisi halus berdasarkan deltaTime)
             if (shouldBlur) {

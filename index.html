@@ -34,20 +34,59 @@
             <!-- Video untuk preview hasil rekaman -->
             <video id="preview-video" class="hidden" controls playsinline></video>
             
-            <!-- Overlay untuk hitungan mundur -->
+            <!-- Overlay untuk hitungan mundur rekam -->
             <div id="countdown-overlay" class="countdown-overlay hidden">3</div>
+
+            <!-- Overlay hitung mundur photobooth -->
+            <div id="photobooth-countdown" class="photobooth-countdown hidden">3</div>
+            
+            <!-- Overlay efek flash kamera -->
+            <div id="camera-flash" class="camera-flash hidden"></div>
             
             <!-- Tombol Fullscreen -->
             <button id="fullscreen-btn" class="fullscreen-btn">🔲 Full Screen</button>
+
+            <!-- Sidebar Pemilih Layout Photobooth -->
+            <div id="layout-sidebar" class="layout-sidebar">
+                <div class="layout-btn" data-layout="1" title="1 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="2" title="2 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="3" title="3 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn active" data-layout="4" title="4 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Live Strip Photobooth -->
+            <div id="live-strip-preview" class="live-strip-preview hidden">
+                <!-- Thumbnail foto akan ditambahkan ke sini oleh JavaScript -->
+            </div>
         </div>
 
         <div class="bottom-ui">
+            <div class="spotify-container">
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5ub2KSCpnGbmYyKLruGUPF?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+
             <div class="controls-container">
                 <button id="manual-trigger-btn" class="manual-btn">TAHAN UNTUK BLUR (Spasi)</button>
             </div>
 
             <div class="preset-container" id="preset-selector-container">
-                <label for="blur-preset">Tingkat Blur:</label>
+                <label for="blur-preset">Blur:</label>
                 <select id="blur-preset">
                     <option value="8">Ringan</option>
                     <option value="15" selected>Sedang</option>
@@ -101,6 +140,20 @@
                 <li>🔒 <strong>100% Aman:</strong> Semua proses jalan di HP/Laptop kamu, nggak ada data yang dikirim ke server.</li>
             </ul>
             <button id="btn-close-popup" class="popup-btn">Paham, Gas!</button>
+        </div>
+    </div>
+
+    <!-- Popup Preview Hasil Foto -->
+    <div id="preview-popup" class="popup-overlay hidden">
+        <div class="popup-content preview-content">
+            <h2>📸 Hasil Photobooth</h2>
+            <div class="preview-image-container">
+                <img id="preview-image" src="" alt="Hasil Foto" />
+            </div>
+            <div class="preview-actions">
+                <button id="btn-download-photo" class="popup-btn">⬇️ Download Foto</button>
+                <button id="btn-close-preview" class="popup-btn secondary-btn">Batal / Foto Lagi</button>
+            </div>
         </div>
     </div>
 
