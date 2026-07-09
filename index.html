@@ -3,132 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sedang Pemeliharaan - Foto Kita Blur</title>
+    <title>Foto Kita Blur - Webcam Preview</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=9">
-    <style>
-        .maintenance-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .maintenance-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-            border-radius: 24px;
-            padding: 50px 40px;
-            max-width: 500px;
-            text-align: center;
-            animation: floatUp 0.8s ease-out;
-        }
-
-        .icon-container {
-            width: 80px;
-            height: 80px;
-            background: #fff0f2;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 24px;
-            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.2);
-            animation: pulseIcon 2s infinite;
-        }
-
-        .icon-container svg {
-            width: 40px;
-            height: 40px;
-            color: #e63946;
-        }
-
-        .maintenance-title {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #1e293b;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-
-        .maintenance-text {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #475569;
-            margin-bottom: 30px;
-        }
-
-        .maintenance-text strong {
-            color: #e63946;
-        }
-
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: #f1f5f9;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #334155;
-            border: 1px solid #e2e8f0;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            background-color: #f59e0b;
-            border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-            animation: pulseStatus 1.5s infinite;
-        }
-
-        @keyframes floatUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulseIcon {
-            0% { transform: scale(1); box-shadow: 0 10px 25px rgba(230, 57, 70, 0.2); }
-            50% { transform: scale(1.05); box-shadow: 0 15px 35px rgba(230, 57, 70, 0.3); }
-            100% { transform: scale(1); box-shadow: 0 10px 25px rgba(230, 57, 70, 0.2); }
-        }
-
-        @keyframes pulseStatus {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(245, 158, 11, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
-    <div class="maintenance-wrapper">
-        <div class="maintenance-card">
-            <div class="icon-container">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </div>
-            
-            <h1 class="maintenance-title">Sedang Dalam Pembaruan</h1>
-            
-            <p class="maintenance-text">
-                Mohon maaf atas ketidaknyamanannya. <strong>Foto Kita Blur</strong> saat ini sedang dalam tahap pemeliharaan sistem untuk meningkatkan fitur dan memberikan pengalaman yang lebih baik. Silakan kembali beberapa saat lagi!
-            </p>
+    <div class="container">
+        <div class="camera-stage">
+            <div class="camera-and-controls">
+                <div class="main-logo-container">
+                    <svg class="main-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="100%" height="100%">
+                      <!-- Definisi Warna
+                           Coklat Tua: #3D2314
+                           Coklat Muda/Krem: #BA8454
+                      -->
+                      <defs>
+                        <!-- Filter untuk sedikit bayangan agar elegan (Opsional) -->
+                        <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.1" />
+                        </filter>
+                      </defs>
+                    
+                      <g transform="translate(40, 30)">
+                        <!-- ===== BARIS PERTAMA: F O K U ===== -->
+                        
+                        <!-- Huruf F -->
+                        <path d="M 0,0 L 40,0 L 40,15 L 15,15 L 15,35 L 35,35 L 35,50 L 15,50 L 15,70 L 0,70 Z" fill="#3D2314" />
+                    
+                        <!-- Huruf O (Ikon Kamera Fokus Atas - Warna Terang) -->
+                        <g transform="translate(50, 0)">
+                          <!-- Sudut Bingkai Fokus Kiri Atas -->
+                          <path d="M 10,0 L 0,0 L 0,10 L 5,10 L 5,5 L 10,5 Z" fill="#BA8454" />
+                          <!-- Sudut Bingkai Fokus Kanan Atas -->
+                          <path d="M 60,0 L 70,0 L 70,10 L 65,10 L 65,5 L 60,5 Z" fill="#BA8454" />
+                          
+                          <!-- Lingkaran 'O' -->
+                          <circle cx="35" cy="35" r="22" fill="none" stroke="#BA8454" stroke-width="12" />
+                        </g>
+                    
+                        <!-- Huruf K -->
+                        <path d="M 140,0 L 155,0 L 155,30 L 175,0 L 195,0 L 170,35 L 195,70 L 175,70 L 155,40 L 155,70 L 140,70 Z" fill="#3D2314" />
+                    
+                        <!-- Huruf U -->
+                        <path d="M 205,0 L 220,0 L 220,45 C 220,55 225,60 235,60 C 245,60 250,55 250,45 L 250,0 L 265,0 L 265,45 C 265,65 255,75 235,75 C 215,75 205,65 205,45 Z" fill="#3D2314" />
+                    
+                    
+                        <!-- ===== BARIS KEDUA: F O K U ===== -->
+                        <g transform="translate(275, 0)">
+                          
+                          <!-- Huruf F -->
+                          <path d="M 0,0 L 40,0 L 40,15 L 15,15 L 15,35 L 35,35 L 35,50 L 15,50 L 15,70 L 0,70 Z" fill="#3D2314" />
+                    
+                          <!-- Huruf O (Ikon Kamera Fokus Bawah - Warna Gelap) -->
+                          <g transform="translate(50, 0)">
+                            <!-- Sudut Bingkai Fokus Kiri Bawah -->
+                            <path d="M 0,60 L 0,70 L 10,70 L 10,65 L 5,65 L 5,60 Z" fill="#3D2314" />
+                            <!-- Sudut Bingkai Fokus Kanan Bawah -->
+                            <path d="M 70,60 L 70,70 L 60,70 L 60,65 L 65,65 L 65,60 Z" fill="#3D2314" />
+                            
+                            <!-- Lingkaran 'O' -->
+                            <circle cx="35" cy="35" r="22" fill="none" stroke="#3D2314" stroke-width="12" />
+                          </g>
+                    
+                          <!-- Huruf K -->
+                          <path d="M 140,0 L 155,0 L 155,30 L 175,0 L 195,0 L 170,35 L 195,70 L 175,70 L 155,40 L 155,70 L 140,70 Z" fill="#3D2314" />
+                    
+                          <!-- Huruf U -->
+                          <path d="M 205,0 L 220,0 L 220,45 C 220,55 225,60 235,60 C 245,60 250,55 250,45 L 250,0 L 265,0 L 265,45 C 265,65 255,75 235,75 C 215,75 205,65 205,45 Z" fill="#3D2314" />
+                    
+                        </g>
+                      </g>
+                    </svg>
+                </div>
+                <p class="subtitle" style="text-align: center; margin-bottom: 5px;">by <strong>@alwnfarhn</strong></p>
+                <div class="video-container">
+                    <video id="webcam-video" autoplay playsinline muted></video>
+                    <canvas id="output-canvas"></canvas>
+                    
+                    <!-- Overlay untuk hitungan mundur rekam -->
+                    <div id="countdown-overlay" class="countdown-overlay hidden">3</div>
+    
+                    <!-- Overlay hitung mundur photobooth -->
+                    <div id="photobooth-countdown" class="photobooth-countdown hidden">3</div>
+                    
+                    <!-- Overlay efek flash kamera -->
+                    <div id="camera-flash" class="camera-flash hidden"></div>
+                    
+                    <!-- Tombol Fullscreen -->
+                    <button id="fullscreen-btn" class="fullscreen-btn">🔲 Full Screen</button>
+    
+                    <!-- Preview Live Strip Photobooth -->
+                    <div id="live-strip-preview" class="live-strip-preview hidden">
+                        <!-- Thumbnail foto akan ditambahkan ke sini oleh JavaScript -->
+                    </div>
+                </div>
 
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                Sistem sedang diupdate...
+                <!-- Error & Loading Messages -->
+                <div id="error-message" class="error-container hidden"></div>
+                <div id="loading-message" class="loading-container">⏳ Memuat model AI Pendeteksi Tangan...</div>
+
+            <div class="bottom-ui">
+                <!-- Photobox Control Panel -->
+                <div class="photobox-panel">
+                    <!-- Kiri: Blur Options -->
+                    <div class="panel-side panel-left">
+                        <label class="retro-label">Tingkat Blur</label>
+                        <select id="blur-preset" class="retro-select">
+                            <option value="8">Ringan</option>
+                            <option value="15" selected>Sedang</option>
+                            <option value="35">Brutal</option>
+                        </select>
+                    </div>
+    
+                    <!-- Tengah: Shutter Button -->
+                    <div class="panel-center">
+                        <button id="manual-trigger-btn" class="shutter-btn">
+                            <span class="shutter-text">TAHAN (SPASI)</span>
+                        </button>
+                    </div>
+    
+                    <!-- Kanan: Mirror & Record -->
+                    <div class="panel-side panel-right">
+                        <label class="mirror-label retro-label">
+                            <input type="checkbox" id="mirror-toggle" checked>
+                            Mode Mirror
+                        </label>
+                        <div id="recording-indicator" class="recording-indicator hidden">
+                            🔴 Merekam BTS...
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="spotify-container">
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5ub2KSCpnGbmYyKLruGUPF?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                </div>
+            </div> <!-- End of bottom-ui -->
+        </div> <!-- End of camera-and-controls -->
+
+        <div class="side-options-container">
+            <!-- Sidebar Pemilih Layout Photobooth -->
+            <div id="layout-sidebar" class="layout-sidebar">
+                <div class="layout-btn" data-layout="1" title="1 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="2" title="2 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="3" title="3 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn active" data-layout="4" title="4 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Pemilih Desain Bingkai (Placeholder) -->
+            <div id="frame-design-panel" class="frame-design-panel">
+                <span class="retro-label" style="text-align: center; margin-bottom: 4px;">Tema Bingkai</span>
+                <div class="frame-options">
+                    <div class="frame-btn active" title="Putih Polos" data-frame="white" data-text="#222">
+                        <div class="frame-preview" style="background: white;"></div>
+                        <span class="frame-name">Minimalist</span>
+                    </div>
+                    <div class="frame-btn" title="Hitam Elegan" data-frame="#111" data-text="#fff">
+                        <div class="frame-preview" style="background: #111;"></div>
+                        <span class="frame-name">Elegant</span>
+                    </div>
+                    <div class="frame-btn" title="Pink Pastel" data-frame="#ffb7b2" data-text="#222">
+                        <div class="frame-preview" style="background: #ffb7b2;"></div>
+                        <span class="frame-name">Coquette</span>
+                    </div>
+                    <div class="frame-btn" title="Retro Style" data-frame="retro" data-text="#222">
+                        <div class="frame-preview" style="background: linear-gradient(45deg, #f3ec78, #af4261);"></div>
+                        <span class="frame-name">Retro Film</span>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End of side-options-container -->
+    </div> <!-- End of camera-stage -->
+</div> <!-- End of container -->
+
+    <!-- Popup 1: Welcome & Rules -->
+    <div id="popup-1" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>🎉 Yeay! Uji Coba Gratis 7 Hari Kamu Sudah Aktif!</h2>
+            <div class="trial-badge">🎁 Periode: <strong>1 Juli – 7 Juli 2025</strong></div>
+            <p>Terima kasih banyak sudah mencoba <strong>Foto Kita Blur!</strong> 🙌</p>
+            <p>Yuk, seru-seruan bareng teman-teman kamu! Jangan lupa buat follow Instagram <strong>@alwnfarhn</strong>, lalu post dan tag hasil foto atau video blur gokil kamu ke <strong>@alwnfarhn</strong> dan <strong>@salpriadi</strong> ya! 📸✨</p>
+            <p>Sebarin juga link web ini ke teman-teman kalian biar bisa seru-seruan bareng. <em>Have fun and thank you!</em> 🚀</p>
+            
+            <div class="info-box">
+                💻 <strong>Penting:</strong> Aplikasi AI ini sangat berat dan saat ini <strong>dioptimalkan untuk Laptop / PC</strong>. Jika kamu menggunakannya di HP dan menemukan <em>bug</em>, fitur tidak jalan, atau patah-patah, mohon maklum ya! Silakan DM kritik, saran, atau laporan <em>bug</em> kamu ke Instagram <strong>@alwnfarhn</strong>.
+            </div>
+
+            <button id="btn-next-popup" class="popup-btn">Mulai Seru-seruan!</button>
+        </div>
+    </div>
+
+    <!-- Popup 2: Cara Penggunaan & Fitur -->
+    <div id="popup-2" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>✨ Cara Menggunakan & Fitur</h2>
+            <div class="challenge-box">
+                🎵 <strong>Challenge:</strong> Sebelum mulai, siapkan HP, buka TikTok dan cari lagu <strong>Sal Priadi - Foto Kita Blur</strong>. Rekam video kalian dan berikan blur terbaik kamu!
+            </div>
+            <ul class="feature-list">
+                <li>✌️ <strong>Sensor Peace:</strong> Acungkan jari "Peace" (✌️) ke kamera untuk nge-blur muka kamu otomatis!</li>
+                <li>👆 <strong>Tombol Manual:</strong> Tahan tombol "TAHAN UNTUK BLUR" atau tombol Spasi di keyboard buat nge-blur secara manual.</li>
+                <li>🎛️ <strong>Tingkat Blur:</strong> Atur sendiri seberapa nge-blur muka kamu (Ringan, Sedang, Brutal).</li>
+                <li>🔴 <strong>Rekam Video:</strong> Bikin video gokil dengan klik "MULAI REKAM" dan langsung download hasilnya.</li>
+                <li>🔒 <strong>100% Aman:</strong> Semua proses jalan di HP/Laptop kamu, nggak ada data yang dikirim ke server.</li>
+            </ul>
+            <button id="btn-close-popup" class="popup-btn">Paham, Gas!</button>
+        </div>
+    </div>
+
+    <!-- Halaman Hasil (Result Page) -->
+    <div id="result-page" class="result-page-wrapper hidden">
+
+        <!-- Step 1: Foto -->
+        <div id="result-step-1" class="result-step result-with-sidebar">
+            <!-- FILTER SELECTION -->
+            <div class="result-filters">
+                <span class="retro-label filter-label">Pilih Efek Filter Foto:</span>
+                <div class="filter-options-scroll">
+                    <div class="filter-btn active" data-filter="none">Normal</div>
+                    <div class="filter-btn" data-filter="grayscale(100%)">B&W</div>
+                    <div class="filter-btn" data-filter="sepia(80%) contrast(1.1)">Vintage</div>
+                    <div class="filter-btn" data-filter="brightness(1.1) contrast(0.9) saturate(0.8)">Pastel</div>
+                    <div class="filter-btn" data-filter="contrast(1.2) saturate(1.3)">Vivid</div>
+                    <div class="filter-btn" data-filter="sepia(30%) hue-rotate(180deg) saturate(150%) brightness(1.1)">Cool</div>
+                    <div class="filter-btn" data-filter="sepia(40%) saturate(120%) brightness(1.05)">Warm</div>
+                </div>
+            </div>
+
+            <div class="result-content-main">
+                <div class="result-header" style="text-align: center; margin-bottom: 15px;">
+                    <h1>Hasil Sesi Kamu</h1>
+                    <p class="subtitle" style="margin-bottom: 0;">Simpan momen serumu!</p>
+                </div>
+                <div class="result-media-box">
+                    <img id="preview-image" src="" alt="Hasil Foto" />
+                </div>
+                <div class="result-actions">
+                    <button id="btn-download-photo" class="popup-btn">⬇️ Download Foto</button>
+                    <button id="btn-next-video" class="popup-btn secondary-btn">Lanjut ke Video BTS ➡️</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Video BTS -->
+        <div id="result-step-2" class="result-step hidden">
+            <div class="result-header" style="text-align: center; margin-bottom: 15px;">
+                <h1>Video BTS Kamu</h1>
+                <p class="subtitle" style="margin-bottom: 0;">Momen seru di balik layar!</p>
+            </div>
+            <div class="result-media-box">
+                <video id="preview-bts-video" controls playsinline></video>
+            </div>
+            <div class="result-actions">
+                <button id="btn-download-video" class="popup-btn">⬇️ Download Video</button>
+                <button id="btn-close-preview" class="popup-btn secondary-btn">🔄 Mulai Sesi Baru</button>
             </div>
         </div>
     </div>
+
+    <script type="module" src="script.js?v=11"></script>
 </body>
 </html>

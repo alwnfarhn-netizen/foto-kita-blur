@@ -29,7 +29,7 @@ body::after {
 
 /* ===== MAIN CONTAINER ===== */
 .container {
-    max-width: 700px;
+    max-width: 1200px;
     width: 100%;
     margin: 0 auto;
     padding: 30px 20px 40px;
@@ -40,13 +40,15 @@ body::after {
 }
 
 /* ===== HEADER / TITLE ===== */
-h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: #e63946;
-    text-align: center;
-    text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+.main-logo-container {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+}
+.main-logo {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.05));
 }
 
 .subtitle {
@@ -99,11 +101,29 @@ h1 {
     color: #111827;
 }
 
+/* ===== CAMERA STAGE ===== */
+.camera-stage {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: flex-start;
+    width: 100%;
+    gap: 20px;
+}
+
+.camera-and-controls {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 640px;
+}
+
 /* ===== VIDEO CONTAINER ===== */
 .video-container {
     width: 100%;
     max-width: 640px;
-    margin: 0 auto;
+    margin: 0;
     border-radius: 24px;
     overflow: hidden;
     position: relative;
@@ -360,26 +380,22 @@ h1 {
     flex-wrap: wrap;
     justify-content: center;
 }
-.record-btn-mini, .action-btn-mini {
-    background: #10b981;
-    color: white;
-    border: none;
+
+.recording-indicator {
+    background: rgba(230, 57, 70, 0.15);
+    color: #e63946;
+    border: 1px solid rgba(230, 57, 70, 0.3);
     padding: 6px 12px;
     font-size: 0.75rem;
     font-weight: 700;
     border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    animation: blinkRed 1.5s infinite;
 }
-.record-btn-mini:hover, .action-btn-mini:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
-}
-.record-btn-mini:active, .action-btn-mini:active {
-    transform: scale(0.95);
-}
-#stop-record-btn {
-    background: #e63946;
+
+@keyframes blinkRed {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 .hidden {
@@ -421,6 +437,29 @@ h1 {
         width: 100%;
         justify-content: space-between;
         padding: 10px 14px;
+    }
+
+    .camera-stage {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .side-options-container {
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .layout-sidebar, .frame-design-panel {
+        flex-direction: row;
+        width: auto;
+        padding: 8px;
+    }
+
+    .frame-options {
+        flex-direction: row;
     }
 }
 
@@ -659,22 +698,132 @@ h1 {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* ===== PREVIEW POPUP ===== */
-.preview-content {
-    max-width: 400px;
+/* ===== RESULT PAGE ===== */
+.result-page-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    overflow-y: auto;
+    padding: 30px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-.preview-image-container {
+.result-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-height: 60vh;
-    overflow-y: auto;
+    animation: floatUp 0.5s ease-out;
+}
+
+.result-content-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* ===== RESULT FILTERS ===== */
+.result-filters {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
-    border-radius: 12px;
-    background: #222;
-    padding: 10px;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    width: 100%;
+    max-width: 600px;
+}
+
+.filter-label {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.filter-options-scroll {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 5px 10px 15px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.filter-btn {
+    padding: 10px 18px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4b5563;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.filter-btn:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+}
+.filter-btn.active {
+    background: #fee2e2;
+    border-color: #e63946;
+    color: #e63946;
+}
+
+/* Desktop Sidebar for Filters */
+@media (min-width: 600px) {
+    .result-with-sidebar {
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        justify-content: center;
+        gap: 40px !important;
+    }
+    
+    .result-filters {
+        width: 250px;
+        order: 2; /* Put filters on the right side */
+        margin-bottom: 0;
+        background: rgba(255, 255, 255, 0.85);
+        padding: 20px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+    }
+    
+    .filter-options-scroll {
+        flex-direction: column !important; /* Stack vertically */
+        gap: 12px;
+        flex-wrap: nowrap !important;
+        padding: 5px;
+    }
+
+    .filter-btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .result-content-main {
+        order: 1; /* Photo on the left */
+        width: auto;
+    }
+}
+
+.result-media-box {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto 20px;
+    border-radius: 24px;
+    background: #111;
+    padding: 14px;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.08), inset 0 0 20px rgba(0,0,0,0.5);
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 #preview-image {
@@ -686,10 +835,19 @@ h1 {
     background-color: white;
 }
 
-.preview-actions {
+#preview-bts-video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    background: #000;
+}
+
+.result-actions {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
 }
 
 .secondary-btn {
@@ -701,12 +859,19 @@ h1 {
     box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
 
+/* ===== SIDE OPTIONS CONTAINER ===== */
+.side-options-container {
+    grid-column: 3;
+    justify-self: start;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 15px;
+}
+
 /* ===== LAYOUT SIDEBAR ===== */
 .layout-sidebar {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -717,6 +882,69 @@ h1 {
     border: 1px solid rgba(255, 255, 255, 0.9);
     z-index: 20;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+/* ===== FRAME DESIGN PANEL ===== */
+.frame-design-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 12px;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    width: 200px;
+}
+
+.frame-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.frame-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    padding: 4px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: rgba(0,0,0,0.02);
+}
+
+.frame-preview {
+    width: 100%;
+    aspect-ratio: 2/3;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.frame-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4b5563;
+    text-align: center;
+}
+
+.frame-btn:hover {
+    background: rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.frame-btn.active {
+    border-color: #e63946;
+    background: rgba(230, 57, 70, 0.05);
+}
+.frame-btn.active .frame-name {
+    color: #e63946;
 }
 
 .layout-btn {

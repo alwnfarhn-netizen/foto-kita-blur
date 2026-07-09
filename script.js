@@ -11,12 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingMessageElement = document.getElementById('loading-message');
     const manualTriggerBtn = document.getElementById('manual-trigger-btn');
     
-    // UI Recording
-    const previewVideoElement = document.getElementById('preview-video');
-    const startRecordBtn = document.getElementById('start-record-btn');
-    const stopRecordBtn = document.getElementById('stop-record-btn');
-    const downloadBtn = document.getElementById('download-btn');
-    const rerecordBtn = document.getElementById('rerecord-btn');
+    // UI Recording & Output
+    const recordingIndicator = document.getElementById('recording-indicator');
+    const previewBtsVideo = document.getElementById('preview-bts-video');
+    const btnDownloadVideo = document.getElementById('btn-download-video');
     const countdownOverlay = document.getElementById('countdown-overlay');
     const photoboothCountdown = document.getElementById('photobooth-countdown');
     const cameraFlash = document.getElementById('camera-flash');
@@ -44,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let photoboothCurrentPhotoIndex = 0;
     let photoboothImages = [];
     let photoboothBlurStartTime = 0;
+    let photoboothProcessing = false; // Kunci agar tidak mulai sesi baru saat masih proses
     
     // UI Layout Sidebar
     const layoutBtns = document.querySelectorAll('.layout-btn');
@@ -54,6 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
             layoutBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             photoboothTotalPhotos = parseInt(btn.getAttribute('data-layout'), 10) || 4;
+        });
+    });
+    
+    // UI Frame Sidebar
+    const frameBtns = document.querySelectorAll('.frame-btn');
+    let currentFrameBg = 'white';
+    let currentFrameText = '#222';
+
+    frameBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            frameBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFrameBg = btn.getAttribute('data-frame') || 'white';
+            currentFrameText = btn.getAttribute('data-text') || '#222';
         });
     });
     
@@ -164,45 +177,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Logic Perekaman Video (MediaRecorder) ---
+    // --- Logic Perekaman Video BTS (MediaRecorder) ---
     let mediaRecorder;
     let recordedChunks = [];
-
-    function setupRecordingUI() {
-        startRecordBtn.addEventListener('click', startCountdown);
-        stopRecordBtn.addEventListener('click', stopRecording);
-        downloadBtn.addEventListener('click', downloadVideo);
-        rerecordBtn.addEventListener('click', resetToLive);
-    }
-
-    function startCountdown() {
-        startRecordBtn.classList.add('hidden');
-        countdownOverlay.classList.remove('hidden');
-        presetSelect.disabled = true; // Kunci preset saat mulai rekam
-        
-        let count = 3;
-        countdownOverlay.textContent = count;
-
-        const interval = setInterval(() => {
-            count--;
-            if (count > 0) {
-                countdownOverlay.textContent = count;
-            } else {
-                clearInterval(interval);
-                countdownOverlay.classList.add('hidden');
-                startRecording();
-            }
-        }, 1000);
-    }
+    let currentBtsVideoUrl = null;
 
     function startRecording() {
         recordedChunks = [];
-        
-        // Ambil frame rate 30 FPS dari canvas
         const canvasStream = canvasElement.captureStream(30);
         
         try {
-            // Gunakan format webm (native didukung di Chrome/Firefox)
             mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
         } catch (e) {
             console.warn("Format spesifik tidak didukung, menggunakan format bawaan", e);
@@ -217,100 +201,151 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mediaRecorder.onstop = () => {
             const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const videoURL = URL.createObjectURL(blob);
-            previewVideoElement.src = videoURL;
-            
-            // Pindah UI dari Live Canvas ke Preview Video
-            canvasElement.classList.add('hidden');
-            previewVideoElement.classList.remove('hidden');
-            // Bug fix #1: .controls-container tidak ada di HTML, elemen yang benar adalah .photobox-panel
-            document.querySelector('.photobox-panel').classList.add('hidden');
-            
-            stopRecordBtn.classList.add('hidden');
-            downloadBtn.classList.remove('hidden');
-            rerecordBtn.classList.remove('hidden');
+            if (currentBtsVideoUrl) URL.revokeObjectURL(currentBtsVideoUrl);
+            currentBtsVideoUrl = URL.createObjectURL(blob);
+            if(previewBtsVideo) previewBtsVideo.src = currentBtsVideoUrl;
         };
 
         mediaRecorder.start();
-        stopRecordBtn.classList.remove('hidden');
+        if (recordingIndicator) recordingIndicator.classList.remove('hidden');
     }
 
     function stopRecording() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
-        // Bug fix #4: pastikan preset kembali bisa diubah setelah stop,
-        // karena resetToLive() mungkin tidak selalu dipanggil
-        presetSelect.disabled = false;
+        if (recordingIndicator) recordingIndicator.classList.add('hidden');
     }
 
-    function downloadVideo() {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        document.body.appendChild(a);
-        a.style = 'display: none';
-        a.href = url;
-        a.download = 'foto-kita-blur.webm';
-        a.click();
-        window.URL.revokeObjectURL(url);
+    if (btnDownloadVideo) {
+        btnDownloadVideo.addEventListener('click', () => {
+            if (!currentBtsVideoUrl) return;
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display: none';
+            a.href = currentBtsVideoUrl;
+            a.download = `FotoKitaBlur_BTS_${new Date().getTime()}.webm`;
+            a.click();
+            document.body.removeChild(a);
+        });
     }
-
-    function resetToLive() {
-        // Hapus memori video sebelumnya
-        URL.revokeObjectURL(previewVideoElement.src);
-        previewVideoElement.src = "";
-        
-        // Kembali ke mode live
-        previewVideoElement.classList.add('hidden');
-        canvasElement.classList.remove('hidden');
-        // Bug fix #1: gunakan selector yang benar sesuai HTML
-        document.querySelector('.photobox-panel').classList.remove('hidden');
-        
-        downloadBtn.classList.add('hidden');
-        rerecordBtn.classList.add('hidden');
-        startRecordBtn.classList.remove('hidden');
-        presetSelect.disabled = false; // Buka kunci preset
-    }
-
-    // Panggil setup
-    setupRecordingUI();
 
     // === LOGIKA PHOTOBOOTH CANVAS STITCHING ===
 
-    const previewPopup = document.getElementById('preview-popup');
+    const mainContainer = document.querySelector('.container'); // The main app container
+    const resultPage = document.getElementById('result-page');
+    const resultStep1 = document.getElementById('result-step-1');
+    const resultStep2 = document.getElementById('result-step-2');
+    
     const previewImage = document.getElementById('preview-image');
     const btnDownloadPhoto = document.getElementById('btn-download-photo');
+    const btnNextVideo = document.getElementById('btn-next-video');
     const btnClosePreview = document.getElementById('btn-close-preview');
     let currentPhotoDataUrl = null;
+
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    let currentResultFilter = 'none';
+
+    if (filterBtns.length > 0) {
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentResultFilter = btn.getAttribute('data-filter') || 'none';
+                previewImage.style.filter = currentResultFilter;
+            });
+        });
+    }
 
     function showPreviewModal(dataUrl) {
         currentPhotoDataUrl = dataUrl;
         previewImage.src = dataUrl;
-        previewPopup.classList.remove('hidden');
-        setTimeout(() => previewPopup.classList.add('show'), 10);
+        
+        // Sembunyikan halaman utama, tampilkan halaman hasil
+        if(mainContainer) mainContainer.classList.add('hidden');
+        if(resultPage) resultPage.classList.remove('hidden');
+        
+        // Reset filter
+        currentResultFilter = 'none';
+        previewImage.style.filter = 'none';
+        if (filterBtns.length > 0) {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            filterBtns[0].classList.add('active');
+        }
+        
+        // Mulai dari Step 1 (Foto)
+        if(resultStep1) resultStep1.classList.remove('hidden');
+        if(resultStep2) resultStep2.classList.add('hidden');
+        
+        // Scroll ke atas halaman hasil
+        window.scrollTo(0, 0);
     }
 
-    btnDownloadPhoto.addEventListener('click', () => {
-        if (!currentPhotoDataUrl) return;
-        const a = document.createElement('a');
-        a.href = currentPhotoDataUrl;
-        a.download = `FotoKitaBlur_Strip_${new Date().getTime()}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    });
+    if(btnDownloadPhoto) {
+        btnDownloadPhoto.addEventListener('click', () => {
+            if (!currentPhotoDataUrl) return;
+            
+            if (currentResultFilter === 'none') {
+                const a = document.createElement('a');
+                a.href = currentPhotoDataUrl;
+                a.download = `FotoKitaBlur_Strip_${new Date().getTime()}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                goToVideoStep();
+            } else {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.filter = currentResultFilter;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const a = document.createElement('a');
+                    a.href = canvas.toDataURL('image/jpeg', 0.9);
+                    a.download = `FotoKitaBlur_Strip_${new Date().getTime()}.jpg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    goToVideoStep();
+                };
+                img.src = currentPhotoDataUrl;
+            }
+        });
+    }
 
-    btnClosePreview.addEventListener('click', () => {
-        previewPopup.classList.remove('show');
-        setTimeout(() => {
-            previewPopup.classList.add('hidden');
+    if(btnNextVideo) {
+        btnNextVideo.addEventListener('click', goToVideoStep);
+    }
+
+    function goToVideoStep() {
+        if(resultStep1) resultStep1.classList.add('hidden');
+        if(resultStep2) resultStep2.classList.remove('hidden');
+    }
+
+    if(btnClosePreview) {
+        btnClosePreview.addEventListener('click', () => {
+            // Kembali ke main page
+            if(resultPage) resultPage.classList.add('hidden');
+            if(mainContainer) mainContainer.classList.remove('hidden');
+            
+            if (previewBtsVideo) previewBtsVideo.pause();
+            
+            // Bersihkan hasil sebelumnya
             previewImage.src = "";
+            if (previewBtsVideo) previewBtsVideo.src = "";
             currentPhotoDataUrl = null;
-            // Sembunyikan juga live strip saat popup ditutup
-            liveStripPreview.classList.add('hidden');
-        }, 400);
-    });
+            
+            if (liveStripPreview) liveStripPreview.classList.add('hidden');
+            
+            // Buka kunci agar bisa mulai sesi baru
+            photoboothProcessing = false;
+        });
+    }
 
     function processPhotoboothGrid() {
         if (photoboothImages.length === 0) return;
@@ -329,8 +364,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const context = canvas.getContext('2d');
         
-        // Base background
-        context.fillStyle = '#fdfdfd';
+        // Base background (Apply Frame Theme)
+        if (currentFrameBg === 'retro') {
+            const grad = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, '#f3ec78');
+            grad.addColorStop(1, '#af4261');
+            context.fillStyle = grad;
+        } else {
+            context.fillStyle = currentFrameBg;
+        }
         context.fillRect(0, 0, canvas.width, canvas.height);
         
         let loadedImages = 0;
@@ -362,16 +404,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Branding text at the bottom
         ctx.font = "bold 45px 'Plus Jakarta Sans', Arial, sans-serif";
-        ctx.fillStyle = "#222222";
+        ctx.fillStyle = currentFrameText;
         ctx.textAlign = "center";
         ctx.fillText("FOTO KITA BLUR", canvas.width / 2, canvas.height - 70);
 
+        ctx.globalAlpha = 0.8;
         ctx.font = "24px 'Plus Jakarta Sans', Arial, sans-serif";
-        ctx.fillStyle = "#777777";
+        ctx.fillStyle = currentFrameText;
         ctx.fillText("📷 IG & 🎵 TikTok: @alwnfarhn", canvas.width / 2, canvas.height - 30);
+        ctx.globalAlpha = 1.0;
 
         const finalDataURL = canvas.toDataURL('image/jpeg', 0.9);
         showPreviewModal(finalDataURL);
+    }
+
+    function applyAestheticEffects(ctx, width, height) {
+        // 1. Vignette (Bayangan gelap melingkar di tepi)
+        const gradient = ctx.createRadialGradient(
+            width / 2, height / 2, width * 0.4,
+            width / 2, height / 2, width * 0.9
+        );
+        gradient.addColorStop(0, 'rgba(0,0,0,0)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0.6)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+
+        // 2. Film Grain Tipis (Noise statis)
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const noise = (Math.random() - 0.5) * 35;
+            data[i] += noise;
+            data[i+1] += noise;
+            data[i+2] += noise;
+        }
+        ctx.putImageData(imageData, 0, 0);
+        
+        // 3. Warna hangat (Retro feel)
+        ctx.fillStyle = 'rgba(255, 140, 0, 0.1)';
+        ctx.fillRect(0, 0, width, height);
     }
 
     function takeSnapshotForGrid() {
@@ -410,6 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tempCanvas.height = cropH;
         const tctx = tempCanvas.getContext('2d');
         
+        // Hasil foto dipastikan selalu jernih (tanpa blur) sesuai permintaan
+        tctx.filter = 'none';
+
         // Terapkan mirror (cermin) jika mode mirror aktif
         if (isMirrored) {
             tctx.translate(cropW, 0);
@@ -419,7 +493,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Gambar dari videoElement asli
         tctx.drawImage(videoElement, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
 
-        const dataURL = tempCanvas.toDataURL('image/jpeg', 0.9);
+        tctx.filter = 'none'; // reset filter
+        
+        // Terapkan efek estetis (Vignette & Film Grain) pada canvas snapshot
+        applyAestheticEffects(tctx, cropW, cropH);
+
+        const dataURL = tempCanvas.toDataURL('image/jpeg', 1.0); // Kualitas maksimal 1.0
         photoboothImages.push(dataURL);
         
         // Tampilkan di Live Strip Preview
@@ -513,12 +592,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const userTriggering = peaceSignDetected || isManualTriggerActive;
 
             // --- LOGIKA PHOTOBOOTH COUNTDOWN ---
-            if (userTriggering && photoboothState === 'IDLE') {
+            if (userTriggering && photoboothState === 'IDLE' && !photoboothProcessing) {
                 isPhotoboothActive = true;
                 photoboothState = 'BLUR_WAIT';
                 photoboothBlurStartTime = now;
                 photoboothCurrentPhotoIndex = 0;
                 photoboothImages = [];
+                
+                // Mulai perekaman video BTS
+                startRecording();
                 
                 // Clear dan tampilkan live preview
                 liveStripPreview.innerHTML = '';
@@ -528,7 +610,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPhotoboothActive) {
                 if (!userTriggering) {
                      // Abort jika jari diturunkan sebelum selesai
-                     // Bug fix #2 & #3: bersihkan semua state photobooth saat abort
                      isPhotoboothActive = false;
                      photoboothState = 'IDLE';
                      photoboothCountdown.classList.add('hidden');
@@ -536,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      liveStripPreview.innerHTML = ''; // Bersihkan thumbnail foto partial
                      photoboothImages = [];           // Reset array foto agar tidak bocor ke sesi berikutnya
                      photoboothCurrentPhotoIndex = 0;
+                     stopRecording(); // Berhenti rekam
                 } else {
                     if (photoboothState === 'BLUR_WAIT') {
                         if (now - photoboothBlurStartTime >= 1000) {
@@ -574,6 +656,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Semua foto selesai
                                 isPhotoboothActive = false;
                                 photoboothState = 'IDLE';
+                                photoboothProcessing = true; // Kunci agar tidak mulai sesi baru
+                                stopRecording(); // Berhenti rekam
                                 processPhotoboothGrid();
                             }
                         }
@@ -581,7 +665,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            const shouldBlur = userTriggering;
+            // Blur hanya aktif saat sedang countdown (3,2,1) jika dalam sesi photobooth
+            const shouldBlur = isPhotoboothActive ? (photoboothState === 'COUNTING') : userTriggering;
 
             // 2. Hitung intensitas blur (Transisi halus berdasarkan deltaTime)
             if (shouldBlur) {
