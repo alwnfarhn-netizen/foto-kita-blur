@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto Kita Blur - Webcam Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=8">
+</head>
+<body>
+    <div class="container">
+        <h1>Foto Kita Blur</h1>
+        <p class="subtitle">by <strong>@alwnfarhn</strong></p>
+        
+        <div class="privacy-notice">
+            <strong>🔒 Privasi Terjamin:</strong> AI pendeteksi tangan (MediaPipe) dan perekaman video berjalan 100% secara lokal di browser perangkat Anda. Video Anda <strong>tidak pernah dikirim ke server mana pun</strong>.
+        </div>
+
+        <div id="error-message" class="error-container hidden">
+            <!-- Error messages will be injected here -->
+        </div>
+
+        <div id="loading-message" class="loading-container">
+            Loading AI Model (MediaPipe)...
+        </div>
+
+
+        <div class="video-container">
+            <video id="webcam-video" autoplay playsinline muted></video>
+            <canvas id="output-canvas"></canvas>
+            
+            <!-- Video untuk preview hasil rekaman -->
+            <video id="preview-video" class="hidden" controls playsinline></video>
+            
+            <!-- Overlay untuk hitungan mundur rekam -->
+            <div id="countdown-overlay" class="countdown-overlay hidden">3</div>
+
+            <!-- Overlay hitung mundur photobooth -->
+            <div id="photobooth-countdown" class="photobooth-countdown hidden">3</div>
+            
+            <!-- Overlay efek flash kamera -->
+            <div id="camera-flash" class="camera-flash hidden"></div>
+            
+            <!-- Tombol Fullscreen -->
+            <button id="fullscreen-btn" class="fullscreen-btn">🔲 Full Screen</button>
+
+            <!-- Sidebar Pemilih Layout Photobooth -->
+            <div id="layout-sidebar" class="layout-sidebar">
+                <div class="layout-btn" data-layout="1" title="1 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="2" title="2 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn" data-layout="3" title="3 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+                <div class="layout-btn active" data-layout="4" title="4 Foto">
+                    <div class="layout-icon">
+                        <div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div><div class="icon-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Live Strip Photobooth -->
+            <div id="live-strip-preview" class="live-strip-preview hidden">
+                <!-- Thumbnail foto akan ditambahkan ke sini oleh JavaScript -->
+            </div>
+        </div>
+
+        <div class="bottom-ui">
+            <!-- Photobox Control Panel -->
+            <div class="photobox-panel">
+                <!-- Kiri: Blur Options -->
+                <div class="panel-side panel-left">
+                    <label class="retro-label">Tingkat Blur</label>
+                    <select id="blur-preset" class="retro-select">
+                        <option value="8">Ringan</option>
+                        <option value="15" selected>Sedang</option>
+                        <option value="35">Brutal</option>
+                    </select>
+                </div>
+
+                <!-- Tengah: Shutter Button -->
+                <div class="panel-center">
+                    <button id="manual-trigger-btn" class="shutter-btn">
+                        <span class="shutter-text">TAHAN (SPASI)</span>
+                    </button>
+                </div>
+
+                <!-- Kanan: Mirror & Record -->
+                <div class="panel-side panel-right">
+                    <label class="mirror-label retro-label">
+                        <input type="checkbox" id="mirror-toggle" checked>
+                        Mode Mirror
+                    </label>
+                    <div class="recording-controls mini-recording">
+                        <button id="start-record-btn" class="record-btn-mini">🔴 Rekam Video</button>
+                        <button id="stop-record-btn" class="record-btn-mini hidden">⏹ Stop</button>
+                        <button id="download-btn" class="action-btn-mini hidden">⬇️ Simpan</button>
+                        <button id="rerecord-btn" class="action-btn-mini hidden">🔄 Ulangi</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spotify-container">
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5ub2KSCpnGbmYyKLruGUPF?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup 1: Welcome & Rules -->
+    <div id="popup-1" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>🎉 Yeay! Uji Coba Gratis 7 Hari Kamu Sudah Aktif!</h2>
+            <div class="trial-badge">🎁 Periode: <strong>1 Juli – 7 Juli 2025</strong></div>
+            <p>Terima kasih banyak sudah mencoba <strong>Foto Kita Blur!</strong> 🙌</p>
+            <p>Yuk, seru-seruan bareng teman-teman kamu! Jangan lupa buat follow Instagram <strong>@alwnfarhn</strong>, lalu post dan tag hasil foto atau video blur gokil kamu ke <strong>@alwnfarhn</strong> dan <strong>@salpriadi</strong> ya! 📸✨</p>
+            <p>Sebarin juga link web ini ke teman-teman kalian biar bisa seru-seruan bareng. <em>Have fun and thank you!</em> 🚀</p>
+            
+            <div class="info-box">
+                💻 <strong>Penting:</strong> Aplikasi AI ini sangat berat dan saat ini <strong>dioptimalkan untuk Laptop / PC</strong>. Jika kamu menggunakannya di HP dan menemukan <em>bug</em>, fitur tidak jalan, atau patah-patah, mohon maklum ya! Silakan DM kritik, saran, atau laporan <em>bug</em> kamu ke Instagram <strong>@alwnfarhn</strong>.
+            </div>
+
+            <button id="btn-next-popup" class="popup-btn">Mulai Seru-seruan!</button>
+        </div>
+    </div>
+
+    <!-- Popup 2: Cara Penggunaan & Fitur -->
+    <div id="popup-2" class="popup-overlay hidden">
+        <div class="popup-content">
+            <h2>✨ Cara Menggunakan & Fitur</h2>
+            <div class="challenge-box">
+                🎵 <strong>Challenge:</strong> Sebelum mulai, siapkan HP, buka TikTok dan cari lagu <strong>Sal Priadi - Foto Kita Blur</strong>. Rekam video kalian dan berikan blur terbaik kamu!
+            </div>
+            <ul class="feature-list">
+                <li>✌️ <strong>Sensor Peace:</strong> Acungkan jari "Peace" (✌️) ke kamera untuk nge-blur muka kamu otomatis!</li>
+                <li>👆 <strong>Tombol Manual:</strong> Tahan tombol "TAHAN UNTUK BLUR" atau tombol Spasi di keyboard buat nge-blur secara manual.</li>
+                <li>🎛️ <strong>Tingkat Blur:</strong> Atur sendiri seberapa nge-blur muka kamu (Ringan, Sedang, Brutal).</li>
+                <li>🔴 <strong>Rekam Video:</strong> Bikin video gokil dengan klik "MULAI REKAM" dan langsung download hasilnya.</li>
+                <li>🔒 <strong>100% Aman:</strong> Semua proses jalan di HP/Laptop kamu, nggak ada data yang dikirim ke server.</li>
+            </ul>
+            <button id="btn-close-popup" class="popup-btn">Paham, Gas!</button>
+        </div>
+    </div>
+
+    <!-- Popup Preview Hasil Foto -->
+    <div id="preview-popup" class="popup-overlay hidden">
+        <div class="popup-content preview-content">
+            <h2>📸 Hasil Photobooth</h2>
+            <div class="preview-image-container">
+                <img id="preview-image" src="" alt="Hasil Foto" />
+            </div>
+            <div class="preview-actions">
+                <button id="btn-download-photo" class="popup-btn">⬇️ Download Foto</button>
+                <button id="btn-close-preview" class="popup-btn secondary-btn">Batal / Foto Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js?v=8"></script>
+</body>
+</html>

@@ -223,7 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Pindah UI dari Live Canvas ke Preview Video
             canvasElement.classList.add('hidden');
             previewVideoElement.classList.remove('hidden');
-            document.querySelector('.controls-container').classList.add('hidden'); // Sembunyikan tombol spasi
+            // Bug fix #1: .controls-container tidak ada di HTML, elemen yang benar adalah .photobox-panel
+            document.querySelector('.photobox-panel').classList.add('hidden');
             
             stopRecordBtn.classList.add('hidden');
             downloadBtn.classList.remove('hidden');
@@ -238,6 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
+        // Bug fix #4: pastikan preset kembali bisa diubah setelah stop,
+        // karena resetToLive() mungkin tidak selalu dipanggil
+        presetSelect.disabled = false;
     }
 
     function downloadVideo() {
@@ -260,7 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Kembali ke mode live
         previewVideoElement.classList.add('hidden');
         canvasElement.classList.remove('hidden');
-        document.querySelector('.controls-container').classList.remove('hidden');
+        // Bug fix #1: gunakan selector yang benar sesuai HTML
+        document.querySelector('.photobox-panel').classList.remove('hidden');
         
         downloadBtn.classList.add('hidden');
         rerecordBtn.classList.add('hidden');
@@ -523,10 +528,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isPhotoboothActive) {
                 if (!userTriggering) {
                      // Abort jika jari diturunkan sebelum selesai
+                     // Bug fix #2 & #3: bersihkan semua state photobooth saat abort
                      isPhotoboothActive = false;
                      photoboothState = 'IDLE';
                      photoboothCountdown.classList.add('hidden');
                      liveStripPreview.classList.add('hidden');
+                     liveStripPreview.innerHTML = ''; // Bersihkan thumbnail foto partial
+                     photoboothImages = [];           // Reset array foto agar tidak bocor ke sesi berikutnya
+                     photoboothCurrentPhotoIndex = 0;
                 } else {
                     if (photoboothState === 'BLUR_WAIT') {
                         if (now - photoboothBlurStartTime >= 1000) {
